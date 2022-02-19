@@ -1,0 +1,371 @@
+#
+#Daniel Steck
+#Prog 108 
+#12/1/2020
+#Programing Project 5 - mars
+
+
+#These were imported to make the random password and read csv files
+import string
+from random import *
+import csv
+from random import randint
+
+#These three pieces
+import sys,time,random
+
+
+#Funtion that slows the print statements 
+#(For Flavor)
+def sci_fi_text_slow(str):
+  for c in str + '\n':
+    sys.stdout.write(c)
+    sys.stdout.flush()
+    time.sleep(3./70)
+
+#Funtion that slows the print statements
+#(For flavor and slightly faster)
+def sci_fi_text(str):
+  for c in str + '\n':
+    sys.stdout.write(c)
+    sys.stdout.flush()
+    time.sleep(3./100)
+
+
+#Funtion that displays the title and fun less important things
+def display_title():
+  print()
+  sci_fi_text_slow("Hello, this is the Mars Expedition Personal Database") 
+  print() 
+  sci_fi_text_slow("Username: AdminOveride000")
+  sci_fi_text_slow("Password: **************")
+  print()
+  sci_fi_text_slow("Loading Profile...")
+  print()
+  print()
+
+#
+#
+#
+#
+def add_personnel(listCheck):
+  print()
+
+  new_addition = []
+
+  sci_fi_text("Below you will be asked information about the new person you are adding.")
+  print()
+
+  first_name = input(str("Please input the first name of new personnel:\t\t"))
+
+  last_name = input(str("Please input the last name of new personnel:\t\t"))
+
+  #makes sure that the age can only be a integer
+  age_input = input("Please enter the age as an integer:    ")
+  while age_input.isdecimal() == False:
+    print()
+    sci_fi_text("Invalad Input")
+    age_input = input("Please enter the age as an integer:    ")
+
+  gender_pre =  input("Please enter the person's gender:\t")
+  gender = gender_pre.lower()
+
+  #creats the new id and make sure that there are no matching ids, making each unique
+  new_id = generate_id_num()
+  for person in listCheck:
+    if person[2] == (new_id):
+      new_id = generate_id_num()
+
+  new_email = create_email(first_name,last_name)
+
+  #Assigns a new sleeping assignment and make sure it isnt already taken
+  habitat_num = generate_habitat()
+  for person in listCheck:
+    if person[7] == habitat_num:
+      habitat_num = generate_habitat()
+
+  #calls for the new password
+  new_password = generate_password()
+
+  print()
+
+  #Adds everything created to a new list which is later added to the overarching list
+  new_addition.append(first_name.title())
+  new_addition.append(last_name.title())
+  new_addition.append(new_id)
+  new_addition.append(new_email)
+  new_addition.append(new_password)
+  new_addition.append(age_input)
+  new_addition.append(gender)
+  new_addition.append(habitat_num)
+  return new_addition
+
+#Generates a random 4 digit id number
+def generate_id_num():
+	value = randint(999, 9999)
+	return value
+
+#creates an email based on the persons name
+def create_email(first, last):
+  email = first.lower() + "_" + last.lower() + "@MarsAcademy.org"
+  return email
+
+#Randomly assigns them to a sleeping habitat
+def generate_habitat(): 
+  dome_room = ""
+  room = randint(1,4)
+  bed = randint(1,10)
+
+  all_char = string.ascii_letters
+  dome_room = all_char[25 + room]
+
+  habitat = dome_room + " " + str(bed)
+  return habitat
+
+#Generates a random password
+#most of this code was modified and borrowed from online because I prefer the complexity in the passwords it creates
+def generate_password():
+  characters = string.ascii_letters + string.punctuation  + string.digits
+  random_password =  "".join(choice(characters) for x in range(randint(8, 16)))
+  return random_password
+
+#
+#Lists all current personnel in the database
+#
+def list_persons(personnel_list):
+
+  total_people = len(personnel_list)
+
+  sci_fi_text("Current Personnel: " + str(total_people))
+  print("=====================")
+  sci_fi_text("First Name".ljust(20) + "Last Name".ljust(20) + "Email Address".rjust(26) + "\t" + "Dome Pod".rjust(20))
+  print()
+
+  #Sorts the list by everyones last name
+  personnel_list.sort(key = lambda x: x[1])
+
+  #loops through the entire list printing out the peoples first, last names, email, and sleeping placement
+  for person in personnel_list:
+    print(person[0].rjust(10) + person[1].rjust(19) + person[3].rjust(37) + person[7].rjust(22))
+  print()
+
+#
+#This function seaches the list and prints all people with the same last name as the one searched for
+#
+#
+def search_personnel(list_check):
+  print()
+  search_input = input(str("Enter the last name of the person you are looking for:\t"))
+  check_last = search_input.title()
+  print()
+
+  sci_fi_text("Searched Personnel")
+  print("==================")
+  print()
+  sci_fi_text("Last Name".ljust(20) + "First Name".ljust(15)  + "Dome Pod".rjust(15))
+  print()
+
+  #Initalizes the counter and then loops through the list and prints out everyone whos last name matches
+  counter = 0
+  for person in list_check:
+    if person[1] == check_last:
+      print(person[1].rjust(9) + person[0].rjust(21) + person[7].rjust(20))
+      counter += 1      
+  #If there is no one with that name it prints this out
+  if counter == 0:
+    print()
+    sci_fi_text("There is no one by that name registered")
+
+  print()
+
+
+#
+#Funtion that is used to keep track of  the number of beds in each dome
+# this only keeps track of the number not who is in each bed
+#
+def search_living(list_check):    
+  print()
+  sci_fi_text("Living Quarter Details")
+  print("======================")
+  print()
+  sci_fi_text("Dome Pod".ljust(15) + "Taken Spots".ljust(20) + "Available Spots".ljust(15)   )
+  print()  
+
+  #Starts the counters to keep track of each number
+  counter_a = 0
+  counter_b = 0
+  counter_c = 0
+  counter_d = 0
+
+  #For loop to count the total number of taken beds per dome
+  for person in list_check:
+    if person[7].startswith("A"):
+      counter_a += 1
+    elif person[7].startswith("B"):
+      counter_b += 1
+    elif person[7].startswith("C"):
+      counter_c += 1
+    else:
+      counter_d += 1
+  
+  ##Prints out all the  information 
+  print("Dome A".rjust(8) + str(counter_a).rjust(18) + str(10 - counter_a).rjust(24))
+  print("Dome B".rjust(8) + str(counter_b).rjust(18) + str(10 - counter_b).rjust(24))
+  print("Dome C".rjust(8) + str(counter_c).rjust(18) + str(10 - counter_c).rjust(24))
+  print("Dome D".rjust(8) + str(counter_d).rjust(18) + str(10 - counter_d).rjust(24))
+
+  print()
+
+#
+#This function deletes a person from the database based on first and last name
+#
+#
+def delete_personnel(list_check):
+  list_persons(list_check)
+  sci_fi_text("From the people above who would you like to delete")
+
+  #saves the users inputs
+  last_name = input("Enter the LAST name of the person:\t")
+  first_name = input("Enter the FIRST name of the person:\t")
+  print()
+
+  #Creates a counter to keep track of the index through the list
+  counter = 0
+  for person in list_check:
+
+    #Actual if statement that makes sure the right person is deleted
+    if last_name.title() == person[1] and first_name.title() == person[0]:
+      del list_check[counter]
+      sci_fi_text("Personnel removed from system")
+      print()
+      return list_check
+      
+  counter += 1    
+
+  if counter >= len(list_check):
+    sci_fi_text("No personnel found by that name") 
+
+      
+  
+
+
+
+
+
+#initalized the test list of people
+#Left in just incase
+def personnel_backup():
+  full_personnel = [['Samantha', 'Charles', 3949, 'samantha_charles@MarsAcademy.org', "U'5Za<,0", '31', 'female', 'B 8'], ['Sam', 'Charles', 6281, 'sam_charles@MarsAcademy.org', '1)GIEc9j@_fa{N6e', '38', 'other', 'C 10'], ['Sarah', 'Parker', 5526, 'sarah_parker@MarsAcademy.org', "M5(%})-*'j", '23', 'female', 'C 2'], ['Janine', 'Sharaz', 7583, 'janine_sharaz@MarsAcademy.org', 'hAP:Ye`\\:3', '43', 'female', 'D 5'], ['Sam', 'Smith', 5335, 'sam_smith@MarsAcademy.org', "D'&1onfMbZ)fg", '29', 'male', 'D 7'], ['Dave', 'Smith', 1196, 'dave_smith@MarsAcademy.org', 'z:lG]fLXk]]/', '29', 'male', 'C 1'], ['Sean', 'Spidicey', 8005, 'sean_spidicey@MarsAcademy.org', 'H:v@<Kt}M|OG', '29', 'male', 'D 9'], ['Daniel', 'Steck', 1987, 'daniel_steck@MarsAcademy.org', "S?CKa6'(4c", 23, 'male', 'A 1'], ['Ben', 'Steck', 9159, 'ben_mason@MarsAcademy.org', 'n(]&])06%q', '40', 'male', 'B 7'], ['Rory', 'Williams', 6410, 'rory_williams@MarsAcademy.org', '?9Y/9YqA.ELF#Gih', '27', 'male', 'A 3']]
+
+  return full_personnel
+
+ 
+
+
+#
+#True Main function
+#
+def main():
+  #Calls the title function
+  display_title()
+
+  #filename = 'personnel.csv'
+
+  full_personnel = []
+  """
+
+  # reading csv file 
+  with open(filename, 'r') as csvfile: 
+      # creating a csv reader object 
+      csvreader = csv.reader(csvfile) 
+        
+
+    
+      # extracting each data row one by one 
+      for row in csvreader: 
+          full_personnel.append(row) 
+  
+  """
+  full_personnel = personnel_backup()
+
+  #Gives the user their choices as a list
+  user_choice = ""
+  while user_choice.lower() != "exit":
+    sci_fi_text("Please choose an option from the list below")
+    print()
+    sci_fi_text("Add - Add new personnel to roster")
+    sci_fi_text("List - List current personnel enrolled")
+    sci_fi_text("Search - Search for specific person")
+    sci_fi_text("Domes - Check the number of personnel assigned to each living dome.")
+    sci_fi_text("Delete - Delete a person from the system")
+    sci_fi_text("Exit - Exit the database and close system")
+
+    #saves their input
+    print()
+    user_choice=input("Enter your choice:\t")
+    print()
+
+    #checks the users input to only alllow valid choices
+    while user_choice.lower() != "add" and user_choice.lower() != "list" and user_choice.lower() != "search" and user_choice.lower() != "domes" and user_choice.lower() != "delete" and user_choice.lower() != "exit":
+      print()
+      sci_fi_text("Invalad choice")
+      user_choice = input("Please input a proper choice:\t")
+
+  
+
+
+    #calls the function that is chosen
+    if user_choice.lower() == "add":
+
+      #only allows more people to be added if not at maximum occupancy
+      if len(full_personnel) >= 40:
+        print()
+        sci_fi_text_slow("ERROR: Maximum Capacity Reached")
+        print()
+      else:
+        addition = add_personnel(full_personnel)
+        full_personnel.append(addition)
+    
+
+    elif user_choice.lower() == "list":
+      list_persons(full_personnel)
+
+
+    elif user_choice.lower() == "search":
+      search_personnel(full_personnel)
+
+    elif user_choice.lower() == "domes":
+      search_living(full_personnel)
+
+    elif user_choice.lower() == "delete":
+      full_personnel = delete_personnel(full_personnel)
+    
+
+    elif user_choice.lower() == "exit":
+      print()
+      sci_fi_text("Logging you out")
+      sci_fi_text_slow(". . . . . .")
+      sci_fi_text("Thank you")
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
